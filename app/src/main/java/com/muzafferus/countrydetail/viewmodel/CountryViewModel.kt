@@ -1,7 +1,10 @@
 package com.muzafferus.countrydetail.viewmodel
 
 import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo.exception.ApolloException
 import com.muzafferus.countrydetail.model.Country
 import com.muzafferus.countrydetail.model.Mapper.Companion.toDataModel
@@ -9,7 +12,6 @@ import com.muzafferus.countrydetail.repository.CountryRepository
 import com.muzafferus.countrydetail.view.state.ViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,6 +32,10 @@ class CountryViewModel @Inject constructor(
 
     private fun insert(country: Country) = viewModelScope.launch {
         repository.insert(country)
+    }
+
+    private fun update(country: Country) = viewModelScope.launch {
+        repository.update(country)
     }
 
     private fun deleteAllDB() = viewModelScope.launch {
@@ -72,19 +78,23 @@ class CountryViewModel @Inject constructor(
     }
 
     fun getCountryDetail(id: String) {
-        //TODO: GET DB LIST
-        //IF DB EMPTY OR NULL
-        //GET API REQUEST
-        queryCountryData(id)
+        viewModelScope.launch {
+            repository.getCountry(id).collect {
+                if (it.phone.isEmpty()) {
+                    queryCountryData(id)
+                } else {
+                    _country.postValue(ViewState.Success(it))
+                }
+            }
+        }
     }
-
-//fun dbCountryDetail(id:String){}
 
     private fun queryCountryData(id: String) = viewModelScope.launch {
         _country.postValue(ViewState.Loading())
         try {
             val response = repository.queryCountry(id)
             _country.postValue(ViewState.Success(response.data?.toDataModel()))
+            response.data?.toDataModel()?.let { update(it) }
         } catch (e: ApolloException) {
             Log.d("ApolloException", "Failure", e)
             _country.postValue(ViewState.Error("Error fetching characters"))

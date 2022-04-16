@@ -8,7 +8,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface CountryRepository {
     suspend fun getAllCountries(): Flow<List<Country>>
+    suspend fun getCountry(id:String):Flow<Country>
     suspend fun insert(country: Country)
+    suspend fun update(country: Country)
     suspend fun queryCountriesList(): Response<CountriesListQuery.Data>
     suspend fun queryCountry(id: String): Response<CountryQuery.Data>
     suspend fun deleteAll()

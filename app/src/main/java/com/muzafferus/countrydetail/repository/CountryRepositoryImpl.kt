@@ -21,10 +21,20 @@ class CountryRepositoryImpl @Inject constructor(
         return countryDao.getAllCountries()
     }
 
+    @WorkerThread
+    override suspend fun getCountry(id:String): Flow<Country>{
+        return countryDao.getCountry(id)
+    }
+
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
     override suspend fun insert(country: Country) {
         countryDao.insert(country)
+    }
+    @Suppress("RedundantSuspendModifier")
+    @WorkerThread
+    override suspend fun update(country: Country) {
+        countryDao.update(country)
     }
 
     override suspend fun queryCountriesList(): Response<CountriesListQuery.Data> {
