@@ -1,10 +1,7 @@
 package com.muzafferus.countrydetail.viewmodel
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.apollographql.apollo.exception.ApolloException
 import com.muzafferus.countrydetail.model.Country
 import com.muzafferus.countrydetail.model.Mapper.Companion.toDataModel
@@ -12,6 +9,8 @@ import com.muzafferus.countrydetail.repository.CountryRepository
 import com.muzafferus.countrydetail.view.state.ViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,26 +28,47 @@ class CountryViewModel @Inject constructor(
     val country: LiveData<ViewState<Country>>
         get() = _country
 
-    fun getCountriesList() {
-        //TODO: GET DB LIST
-        //IF DB EMPTY OR NULL
-        //GET API REQUEST
-        queryCountriesList()
+    private fun insert(country: Country) = viewModelScope.launch {
+        repository.insert(country)
     }
 
-    //fun dbCountriesList(){}
+    private fun deleteAllDB() = viewModelScope.launch {
+        repository.deleteAll()
+    }
+
+    fun getCountriesList() {
+        viewModelScope.launch {
+            repository.getAllCountries().collect {
+                if (it.isNullOrEmpty()) {
+                    queryCountriesList()
+                } else {
+                    _countriesList.postValue(ViewState.Success(it))
+                }
+            }
+        }
+    }
 
     private fun queryCountriesList() = viewModelScope.launch {
         _countriesList.postValue(ViewState.Loading())
         try {
             val response = repository.queryCountriesList()
-            _countriesList.postValue(
-                ViewState.Success(response.data?.toDataModel())
-            )
+            val dataModel = response.data?.toDataModel()
+            _countriesList.postValue(ViewState.Success(dataModel))
+            deleteAllDB()
+            insertDB(dataModel)
         } catch (e: ApolloException) {
             Log.d("ApolloException", "Failure", e)
             _countriesList.postValue(ViewState.Error("Error fetching characters"))
         }
+    }
+
+    private fun insertDB(dataModel: List<Country>?) {
+        dataModel?.let {
+            for (country in dataModel) {
+                insert(country)
+            }
+        }
+
     }
 
     fun getCountryDetail(id: String) {
@@ -58,7 +78,7 @@ class CountryViewModel @Inject constructor(
         queryCountryData(id)
     }
 
-    //fun dbCountryDetail(id:String){}
+//fun dbCountryDetail(id:String){}
 
     private fun queryCountryData(id: String) = viewModelScope.launch {
         _country.postValue(ViewState.Loading())

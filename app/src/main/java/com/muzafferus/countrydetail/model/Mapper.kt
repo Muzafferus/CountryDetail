@@ -11,8 +11,8 @@ class Mapper {
                 element.name,
                 element.native_,
                 element.phone,
-                element.capital,
-                element.currency,
+                element.capital?:"",
+                element.currency?:"",
                 element.emoji
             )
         } ?: kotlin.run {
@@ -34,10 +34,10 @@ class Mapper {
         private fun CountriesListQuery.Country.toDataModel(): Country = Country(
             this.code,
             this.name,
-            null,
-            null,
-            this.capital,
-            null,
+            "",
+            "",
+            this.capital?:"",
+            "",
             this.emoji
         )
     }
