@@ -13,6 +13,8 @@ import com.muzafferus.countrydetail.model.Country
 class CountryAdapter :
     ListAdapter<Country, CountryViewHolder>(CountryDiffUtil()) {
 
+    var onItemClicked: ((Country) -> Unit)? = null
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CountryViewHolder {
         val binding: ItemCountryBinding = DataBindingUtil.inflate(
             LayoutInflater.from(parent.context),
@@ -25,6 +27,11 @@ class CountryAdapter :
 
     override fun onBindViewHolder(holder: CountryViewHolder, position: Int) {
         holder.binding.country = getItem(position)
+
+        val country = getItem(position)
+        holder.binding.root.setOnClickListener {
+            onItemClicked?.invoke(country)
+        }
     }
 }
 
@@ -37,6 +44,7 @@ class CountryDiffUtil : DiffUtil.ItemCallback<Country>() {
     ): Boolean {
         return oldItem.code == newItem.code
     }
+
     override fun areContentsTheSame(
         oldItem: Country,
         newItem: Country

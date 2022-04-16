@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_main.xml"
+    app:startDestination="@id/countries_list_fragment">
+
+    <fragment
+        android:id="@+id/countries_list_fragment"
+        android:name="com.muzafferus.countrydetail.view.ui.CountriesListFragment"
+        android:label="List of all countries"
+        tools:layout="@layout/fragment_countries_list">
+        <action
+            android:id="@+id/action_countries_list_fragment_to_country_detail_fragment"
+            app:destination="@id/country_detail_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/country_detail_fragment"
+        android:name="com.muzafferus.countrydetail.view.ui.CountryDetailFragment"
+        android:label="Detail of Country"
+        tools:layout="@layout/fragment_country_detail">
+        <argument
+            android:name="id"
+            app:argType="string" />
+    </fragment>
+
+</navigation>
