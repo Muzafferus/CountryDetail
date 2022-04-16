@@ -6,21 +6,6 @@ import com.muzafferus.coubtrydetail.CountryQuery
 class Mapper {
     companion object {
         fun CountryQuery.Data.toDataModel(): Country? = country?.let { element ->
-            val languages = ArrayList<Language>()
-            for (language in element.languages) {
-                languages.add(
-                    Language(
-                        language.code, language.name,
-                        language.code, language.rtl
-                    )
-                )
-            }
-            val states = ArrayList<State>()
-            for (state in element.states) {
-                states.add(
-                    State(state.code, state.name)
-                )
-            }
             return Country(
                 element.code,
                 element.name,
@@ -28,10 +13,7 @@ class Mapper {
                 element.phone,
                 element.capital,
                 element.currency,
-                element.emoji,
-                Continent(element.continent.code, element.continent.name),
-                languages,
-                states
+                element.emoji
             )
         } ?: kotlin.run {
             return null
@@ -56,8 +38,7 @@ class Mapper {
             null,
             this.capital,
             null,
-            this.emoji,
-            null, null, null
+            this.emoji
         )
     }
 }

@@ -7,19 +7,5 @@ query Country($countryId: ID!) {
         capital
         currency
         emoji
-        continent {
-            code
-            name
-        }
-        languages {
-            code
-            name
-            native
-            rtl
-        }
-        states {
-            code
-            name
-        }
     }
 }
